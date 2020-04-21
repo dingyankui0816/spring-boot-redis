@@ -99,6 +99,7 @@ public class RedisService {
             String dataBaseValue = "数据库中的值";
             System.out.println("分布式锁 -- 获取数据库中的值");
             redisTemplate.opsForValue().set(key,dataBaseValue,60,TimeUnit.MINUTES);
+            //todo  增加try catch 保证锁一定会被删除
             redisTemplate.delete(localKey);
             return dataBaseValue;
         }else{
