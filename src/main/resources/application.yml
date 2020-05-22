@@ -1,4 +1,5 @@
 spring:
   redis:
-    host: localhost
+    host: 47.102.208.251
+    password: leviAdmin
     port: 6379

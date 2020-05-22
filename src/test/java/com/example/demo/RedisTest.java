@@ -22,17 +22,17 @@ public class RedisTest {
     @Test
     public void redisTest(){
         new Thread(()-> {
-            System.out.println(redisService.cacheBreakdown_2("STR5","LOCAL"));
+            System.out.println(redisService.cacheBreakdown_2("a"));
         }).start();
         new Thread(()-> {
-            System.out.println(redisService.cacheBreakdown_2("STR6","LOCAL"));
+            System.out.println(redisService.cacheBreakdown_2("a"));
         }).start();
         new Thread(()-> {
-            System.out.println(redisService.cacheBreakdown_2("STR7","LOCAL"));
+            System.out.println(redisService.cacheBreakdown_2("a"));
         }).start();
         new Thread(()-> {
-            System.out.println(redisService.cacheBreakdown_2("STR8","LOCAL"));
+            System.out.println(redisService.cacheBreakdown_2("a"));
         }).start();
-        System.out.println(redisService.cacheBreakdown_2("STR9","LOCAL"));
+        System.out.println(redisService.cacheBreakdown_2("a"));
     }
 }

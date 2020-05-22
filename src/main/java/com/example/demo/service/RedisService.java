@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import com.alibaba.fastjson.JSON;
 import com.example.demo.async.RedisAsync;
 import com.example.demo.common.RedisConstant;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+//import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,6 +21,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class RedisService {
     @Autowired
@@ -86,31 +89,30 @@ public class RedisService {
      * @param key 缓存键
      * @return
      */
-    public String cacheBreakdown_2(String key,String localKey){
+    public String cacheBreakdown_2(String key){
         System.out.println("线程开始");
         Object value = redisTemplate.opsForValue().get(key);
         if (value!=null){
             return value.toString();
         }
-        Boolean isSuccess=redisTemplate.opsForValue().setIfAbsent(localKey,"easy");
-        System.out.println(Thread.currentThread().getName()+"isSuccess : "+isSuccess);
-        if (isSuccess){
-            //数据库获取信息，并放进缓存中
-            String dataBaseValue = "数据库中的值";
-            System.out.println("分布式锁 -- 获取数据库中的值");
-            redisTemplate.opsForValue().set(key,dataBaseValue,60,TimeUnit.MINUTES);
-            //todo  增加try catch 保证锁一定会被删除
-            redisTemplate.delete(localKey);
-            return dataBaseValue;
-        }else{
-            try {
-                System.out.println(Thread.currentThread().getName()+"\t开始等待");
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        try{
+            Boolean isSuccess=redisTemplate.opsForValue().setIfAbsent("LOCAL:" + key,"easy");
+            redisTemplate.expire("LOCAL",10,TimeUnit.SECONDS);
+            log.info(Thread.currentThread().getName()+"isSuccess : "+isSuccess);
+            if (isSuccess){
+                //数据库获取信息，并放进缓存中
+                String dataBaseValue = "数据库中的值";
+                System.out.println("分布式锁 -- 获取数据库中的值");
+                redisTemplate.opsForValue().set(key,dataBaseValue,60,TimeUnit.SECONDS);
+                return dataBaseValue + "\t 数据库";
             }
-           return  cacheBreakdown_2(key,localKey);
+            return cacheBreakdown_2(key);
+        }catch (Exception e){
+            log.error("cacheBreakdown_2 is error , key : {} ",key,e);
+        }finally {
+            redisTemplate.delete("LOCAL");
         }
+        return null;
     }
 
     /**
@@ -181,7 +183,7 @@ public class RedisService {
      * @param key
      * @return
      */
-    @HystrixCommand(fallbackMethod = "hystrixString")
+//    @HystrixCommand(fallbackMethod = "hystrixString")
     public String cacheBreakdown_5(String key) throws Exception {
         Object value = redisTemplate.opsForValue().get(key);
         if (value!=null){
