@@ -97,7 +97,7 @@ public class RedisService {
         }
         try{
             Boolean isSuccess=redisTemplate.opsForValue().setIfAbsent("LOCAL:" + key,"easy");
-            redisTemplate.expire("LOCAL",10,TimeUnit.SECONDS);
+            redisTemplate.expire("LOCAL" + key,10,TimeUnit.SECONDS);
             log.info(Thread.currentThread().getName()+"isSuccess : "+isSuccess);
             if (isSuccess){
                 //数据库获取信息，并放进缓存中
