@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.DefaultScriptExecutor;
+import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.data.redis.core.script.ScriptExecutor;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -93,5 +97,20 @@ public class RedisTest {
         byte[] bytes = fastJsonRedisSerializer.serialize("测试String 类型");
         System.out.println(fastJsonRedisSerializer.deserialize(bytes));
         System.out.println(new String(bytes,"UTF-8"));
+    }
+
+    @Test
+    public void luaTest(){
+        String lua = "return redis.call('incrBy','redis:test',ARGV[1])";
+        log.info("redis lua result : {}",redisTemplate.execute(RedisScript.of(lua,Long.class),null,1)) ;
+
+    }
+
+    @Test
+    public void loadLuaTest(){
+        String lua = "return {KEYS[1],ARGV[1]}";
+        RedisScript redisScript = new DefaultRedisScript(lua);
+        log.info("lua id : {}",redisScript.getSha1());
+
     }
 }
