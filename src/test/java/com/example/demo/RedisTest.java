@@ -3,6 +3,7 @@ package com.example.demo;
 import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.example.demo.service.RedisService;
 
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.DefaultScriptExecutor;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.data.redis.core.script.ScriptExecutor;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -87,8 +86,8 @@ public class RedisTest {
     @Test
     public void redisSubscribe() {
         String channel = "aaa";
-        redisTemplate.convertAndSend(channel,new String("测试是否成功"));
-        redisTemplate.convertAndSend(channel,new String("bbb"));
+        redisTemplate.convertAndSend(channel,"测试是否成功");
+        redisTemplate.convertAndSend(channel,"bbb");
     }
 
     @Test
@@ -101,8 +100,8 @@ public class RedisTest {
 
     @Test
     public void luaTest(){
-        String lua = "return redis.call('incrBy','redis:test',ARGV[1])";
-        log.info("redis lua result : {}",redisTemplate.execute(RedisScript.of(lua,Long.class),null,1)) ;
+        String lua = "return redis.call('incrBy',KEYS[1],ARGV[1])";
+        log.info("redis lua result : {}",redisTemplate.execute(RedisScript.of(lua,Long.class), Lists.newArrayList("redis:test"),1)) ;
 
     }
 
@@ -111,6 +110,5 @@ public class RedisTest {
         String lua = "return {KEYS[1],ARGV[1]}";
         RedisScript redisScript = new DefaultRedisScript(lua);
         log.info("lua id : {}",redisScript.getSha1());
-
     }
 }
