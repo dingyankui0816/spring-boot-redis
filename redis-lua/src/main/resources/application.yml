@@ -1,0 +1,10 @@
+spring:
+  redis:
+    host: 47.102.208.251
+    password: leviAdmin
+    port: 6379
+    database: 0
+  application:
+    name: redis-lua
+server:
+  port: 8888
